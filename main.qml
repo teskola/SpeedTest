@@ -12,15 +12,6 @@ Window {
        id: speedTest
     }
 
-    Timer {
-        id: timer
-        interval: speedTest.interval
-        running: !speedTest.gameEnded
-        repeat: true
-        onTriggered: speedTest.tick()
-
-    }
-
     Rectangle {
 
         width: parent.width

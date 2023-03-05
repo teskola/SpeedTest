@@ -1,26 +1,15 @@
 #include "speedtest.h"
+#include "colors.cpp"
 #include <QColor>
 #include <QDebug>
 #include <stdlib.h>
 #include <time.h>
-#include <QThread>
 #include <cmath>
 
 
 const int INITIAL_INTERVAL = 2000;
 const int NO_VALUE = -1;
 
-const QColor red_activated = QColor(255, 0, 0);
-const QColor red_idle = QColor(51, 0, 0);
-
-const QColor blue_activated = QColor(0, 0, 255);
-const QColor blue_idle = QColor(0, 0, 51);
-
-const QColor orange_activated = QColor(255,128,0);
-const QColor orange_idle = QColor(51, 25, 0);
-
-const QColor yellow_activated = QColor(255, 255, 0);
-const QColor yellow_idle = QColor(51, 51, 0);
 
 SpeedTest::SpeedTest(QObject *parent)
     : QObject(parent)
@@ -33,24 +22,26 @@ SpeedTest::SpeedTest(QObject *parent)
     , previous (NO_VALUE)
     , next (NO_VALUE)
     , mCount (0)
-    , mInterval (INITIAL_INTERVAL)
     , lastPressed (NO_VALUE)
 
+
+
 {
+
+    // initiate timer
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
+    timer->setTimerType(Qt::PreciseTimer);
+
+    // seed for random numbers
+
+    srand(time(NULL));
 
 }
 
 int SpeedTest::count() {
     return mCount;
-}
-
-int SpeedTest::interval() {
-    return mInterval;
-}
-
-
-bool SpeedTest::gameEnded() {
-    return mGameEnded;
 }
 
 QColor SpeedTest::color_red() {
@@ -74,14 +65,17 @@ void SpeedTest::setCount(int newcount) {
     emit countChanged();
 }
 
-void SpeedTest::setInterval(int newinterval) {
-    mInterval = newinterval;
-    emit intervalChanged();
-}
+/*
+
+  Sets gameEnded status and stops timer if game ended.
+
+*/
 
 void SpeedTest::setGameEnded(bool status) {
     mGameEnded = status;
-    emit gameEndedChanged();
+    if (status) {
+        timer->stop();
+    }
 }
 
 void SpeedTest::setColor_red(QColor newcolor)
@@ -118,10 +112,16 @@ void SpeedTest::setColor_yellow(QColor newcolor)
 
 void SpeedTest::buttonPressed(int index) {
     if (!mGameEnded) {
+
+        // ignore when user presses same button multiple times
+
         if (lastPressed == index) {
             return;
         }
-        if (numbers.empty()) {
+
+        // end game when user presses button when queue is empty or over 9 numbers in queue
+
+        if (numbers.empty() || numbers.size() > 9) {
             setGameEnded(true);
             setColor_red(red_activated);
             setColor_blue(blue_activated);
@@ -129,6 +129,9 @@ void SpeedTest::buttonPressed(int index) {
             setColor_yellow(yellow_activated);
             return;
         }
+
+        // end game when user presses wrong button
+
         int target = numbers.front();
         if (target != index) {
             setGameEnded(true);
@@ -154,13 +157,13 @@ void SpeedTest::buttonPressed(int index) {
             }
             return;
         }
+
+        // user presses right button
+
         numbers.pop();
         setCount(++mCount);
-        int newInterval = 1200-200*log(mCount);
-        setInterval(newInterval);
-        lastPressed = index;
-        qDebug() << mCount;
-        qDebug() << mInterval;
+        timer->setInterval(1200 - 200 * log(mCount));
+        lastPressed = index;      
     }
 
 }
@@ -199,44 +202,46 @@ void SpeedTest::setColors (int previous, int next) {
     }
 }
 
-int SpeedTest::generateRandomNumber (int range) {
-    srand(time(NULL));
-    return rand() % range;
+
+void SpeedTest::clearQueue () {
+    while (!numbers.empty()) {
+        numbers.pop();
+    }
 }
+
+/*
+
+  Timer activates this function
+
+*/
 
 void SpeedTest::tick() {
     if (!mGameEnded) {
-        numbers.push(next);
-        setColors(previous, next);
-        previous = next;
-        next = (next + generateRandomNumber(3) + 1) % 4;
-    }
-    return;
+         numbers.push(next);
+         setColors(previous, next);
+         previous = next;
+         next = (next + (rand() % 3) + 1) % 4;
+         qDebug() << timer->interval();
+     }
+    return;    
 }
 
 void SpeedTest::startGame() {
-    setGameEnded(!mGameEnded);
 
+    setGameEnded(!mGameEnded);    
     setColor_red(red_idle);
     setColor_blue(blue_idle);
     setColor_orange(orange_idle);
     setColor_yellow(yellow_idle);
-    setCount(0);
-    setInterval(INITIAL_INTERVAL);
-    lastPressed = NO_VALUE;
-
-    while (!numbers.empty()) {
-        numbers.pop();
-    }
+    lastPressed = NO_VALUE;    
+    clearQueue();
 
     if (!mGameEnded) {
-        int first = generateRandomNumber(4);
-        numbers.push(first);
-        setColors(previous, first);
-        previous = first;
-        next = (first + generateRandomNumber(3) + 1) % 4;
-    }
-
+        setCount(0);
+        timer->start(INITIAL_INTERVAL);
+        next = rand() % 4;
+        tick();
+     }
 }
 
 
