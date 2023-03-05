@@ -19,7 +19,6 @@ SpeedTest::SpeedTest(QObject *parent)
     , mColor_yellow(yellow_idle)
     , mGameEnded(true)
     , numbers()
-    , previous (NO_VALUE)
     , next (NO_VALUE)
     , mCount (0)
     , lastPressed (NO_VALUE)
@@ -119,14 +118,11 @@ void SpeedTest::buttonPressed(int index) {
             return;
         }
 
-        // end game when user presses button when queue is empty or over 9 numbers in queue
+        // end game when user presses button when queue is empty
 
-        if (numbers.empty() || numbers.size() > 9) {
+        if (numbers.empty()) {
             setGameEnded(true);
-            setColor_red(red_activated);
-            setColor_blue(blue_activated);
-            setColor_orange(orange_activated);
-            setColor_yellow(yellow_activated);
+            activateAll();
             return;
         }
 
@@ -168,22 +164,9 @@ void SpeedTest::buttonPressed(int index) {
 
 }
 
-void SpeedTest::setColors (int previous, int next) {
-    switch (previous) {
-    case 0:
-        setColor_red(red_idle);
-        break;
-    case 1:
-        setColor_blue(blue_idle);
-        break;
-    case 2:
-        setColor_orange(orange_idle);
-        break;
-    case 3:
-        setColor_yellow(yellow_idle);
-        break;
+void SpeedTest::setColors (int next) {
 
-    }
+    idleAll();
 
     switch (next) {
     case 0:
@@ -202,6 +185,19 @@ void SpeedTest::setColors (int previous, int next) {
     }
 }
 
+void SpeedTest::activateAll () {
+    setColor_red(red_activated);
+    setColor_blue(blue_activated);
+    setColor_orange(orange_activated);
+    setColor_yellow(yellow_activated);
+}
+
+void SpeedTest::idleAll() {
+    setColor_red(red_idle);
+    setColor_blue(blue_idle);
+    setColor_orange(orange_idle);
+    setColor_yellow(yellow_idle);
+}
 
 void SpeedTest::clearQueue () {
     while (!numbers.empty()) {
@@ -218,21 +214,25 @@ void SpeedTest::clearQueue () {
 void SpeedTest::tick() {
     if (!mGameEnded) {
          numbers.push(next);
-         setColors(previous, next);
-         previous = next;
+
+         // end game if user has not responded to 10 flashes
+
+         if (numbers.size() > 9) {
+             setGameEnded(true);
+             activateAll();
+             return;
+         }
+
+         setColors(next);
          next = (next + (rand() % 3) + 1) % 4;
          qDebug() << timer->interval();
-     }
-    return;    
+     }    
 }
 
 void SpeedTest::startGame() {
 
     setGameEnded(!mGameEnded);    
-    setColor_red(red_idle);
-    setColor_blue(blue_idle);
-    setColor_orange(orange_idle);
-    setColor_yellow(yellow_idle);
+    idleAll();
     lastPressed = NO_VALUE;    
     clearQueue();
 

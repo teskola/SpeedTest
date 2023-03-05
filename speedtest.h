@@ -52,11 +52,12 @@ private:
     QTimer *timer;
     bool mGameEnded;
     std::queue<int> numbers;
-    int previous;
     int next;
     int mCount;
     void clearQueue();
-    void setColors(int, int);
+    void setColors(int);
+    void activateAll();
+    void idleAll();
     int lastPressed;
 
 
