@@ -71,3 +71,6 @@ Thumbs.db
 *.dll
 *.exe
 
+# installer data
+
+/installer/packages/com.teskola.speedtest/data/*
