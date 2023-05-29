@@ -7,7 +7,7 @@ import SpeedTest 1.0
 ApplicationWindow {
     id: window
     visible: true
-    visibility: "FullScreen"
+    visibility: "Maximized"
     title: qsTr("Speedtest")    
 
     SpeedTest {
