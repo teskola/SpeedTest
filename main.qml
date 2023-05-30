@@ -7,7 +7,7 @@ import SpeedTest 1.0
 ApplicationWindow {
     id: window
     visible: true
-    visibility: "Maximized"
+    visibility: Qt.platform.os !== "android" ? "FullScreen" : "Maximized"
     title: qsTr("Speedtest")    
 
     SpeedTest {
@@ -25,22 +25,22 @@ ApplicationWindow {
                             switch (event.key) {
 
                                 case Qt.Key_A:
-                                redButton.state = "pressed"
+                                redButton.keyPressed = true
                                 redButton.buttonClicked()
                                 break;
 
                                 case Qt.Key_S:
-                                blueButton.state = "pressed"
+                                blueButton.keyPressed = true
                                 blueButton.buttonClicked()
                                 break;
 
                                 case Qt.Key_D:
-                                orangeButton.state = "pressed"
+                                orangeButton.keyPressed = true
                                 orangeButton.buttonClicked()
                                 break;
 
                                 case Qt.Key_F:
-                                yellowButton.state = "pressed"
+                                yellowButton.keyPressed = true
                                 yellowButton.buttonClicked()
                                 break;
                             }
@@ -48,22 +48,28 @@ ApplicationWindow {
         Keys.onReleased: (event) => {
                              switch (event.key) {
                                  case Qt.Key_A:
-                                 redButton.state = "released"
+                                 redButton.keyPressed = false
                                  break;
 
                                  case Qt.Key_S:
-                                 blueButton.state = "released"
+                                 blueButton.keyPressed = false
                                  break;
 
                                  case Qt.Key_D:
-                                 orangeButton.state = "released"
+                                 orangeButton.keyPressed = false
                                  break;
 
                                  case Qt.Key_F:
-                                 yellowButton.state = "released"
+                                 yellowButton.keyPressed = false
                                  break;
                              }
                          }
+        onActiveFocusChanged: {
+            redButton.keyPressed = false
+            blueButton.keyPressed = false
+            orangeButton.keyPressed = false
+            yellowButton.keyPressed = false
+        }
 
         Dialog {
             id: dialog
@@ -94,12 +100,14 @@ ApplicationWindow {
                     text: qsTr("New game")
                     highlighted: true
                     Layout.fillWidth: true
-                    onClicked: speedTest.startGame();
+                    onClicked: speedTest.startGame();                    
+
                     Shortcut {
                         sequence: "Space"
                         onActivated: speedTest.gameEnded && speedTest.startGame();
                     }
                 }
+
                 Button {
                     text: qsTr("Quit")
                     Layout.fillWidth: true

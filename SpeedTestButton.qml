@@ -6,24 +6,13 @@ Rectangle {
     property color activatedColor: "black"
     property bool activated: false
     property bool keyPressed: false
-    readonly property int originalWidth: parent.width
-    readonly property int originalHeight: parent.height    
+    readonly property int originalLength: parent.width
     signal buttonClicked
     color: activated ? activatedColor : idleColor
-    width: originalWidth
-    height: originalHeight
+    width: mouseArea.pressed || keyPressed ? 0.94 * originalLength : originalLength
+    height: width
     radius: 0.5 * width
     anchors.centerIn: parent
-    states:
-        State {
-            name: "pressed"
-            when: mouseArea.pressed || keyPressed
-            PropertyChanges {
-                target: button
-                width: 0.94 * originalWidth
-                height: 0.94 * originalHeight
-            }
-        }
 
     MouseArea {
         id: mouseArea
