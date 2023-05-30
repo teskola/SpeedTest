@@ -1,3 +1,3 @@
 # SpeedTest
 
-![alt text](https://github.com/teskola/SpeedTest/blob/main/screenshot.gif?raw=true)
+![alt text](https://github.com/teskola/SpeedTest/blob/main/speedtest.gif?raw=true)
