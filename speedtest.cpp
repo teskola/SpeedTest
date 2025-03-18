@@ -14,13 +14,12 @@ SpeedTest::SpeedTest(QObject *parent)
     , next (-1)
     , mCount (0)
     , lastPressed (-1)
-
-{          
-
-    // reactionTimes = new QVector<int>;
-
-
-    flashes = new QQueue<Flash>;
+    , flashes (new QQueue<flash>)
+    , intervalTimer (new QTimer(this))
+    , elapsedTimer (new QElapsedTimer())
+    , animationTimer (new QTimer(this))
+    , randomGenerator (QRandomGenerator::global()) // seed for random numbers
+{
 
     // read record points
 
@@ -28,11 +27,8 @@ SpeedTest::SpeedTest(QObject *parent)
 
     // initiate timers
 
-    intervalTimer = new QTimer(this);
     connect(intervalTimer, SIGNAL(timeout()), this, SLOT(tick()));
     intervalTimer->setTimerType(Qt::PreciseTimer);
-
-    elapsedTimer = new QElapsedTimer();
 
     for (int i = 0 ; i < 4 ; i++) {
         wrongButtonTimers[i] = new QTimer(this);
@@ -42,36 +38,13 @@ SpeedTest::SpeedTest(QObject *parent)
     connect(wrongButtonTimers[2], &QTimer::timeout, this, [this]{setOrange_activated(!mOrange_activated);});
     connect(wrongButtonTimers[3], &QTimer::timeout, this, [this]{setYellow_activated(!mYellow_activated);});
 
-
-    animationTimer = new QTimer(this);
     startAnimation();
-
-    // seed for random numbers
-
-    randomGenerator = QRandomGenerator::global();
 
 }
 
 bool SpeedTest::gameEnded() {
     return mGameEnded;
 }
-
-//double SpeedTest::variance(QVector<int> numbers)
-//{
-//    double mean;
-//    int total = 0;
-//    for (int i = 0; i < numbers.size(); i++) {
-//        total += numbers.at(i);
-//    }
-//    mean = total / numbers.size();
-//    double sum = 0;
-//    for (int i = 0; i < numbers.size(); i++) {
-//        double abs = qFabs(numbers.at(i) - mean);
-//        double pw2 = qPow(abs, 2);
-//        sum += pw2;
-//    }
-//    return sum/numbers.size();
-//}
 
 int SpeedTest::count() {
     return mCount;
@@ -128,15 +101,6 @@ void SpeedTest::setGameEnded(bool ended) {
     mGameEnded = ended;    
     if (ended) {
         intervalTimer->stop();
-
-//        if (!reactionTimes->isEmpty()) {
-
-//            qDebug() << *reactionTimes;
-//            qDebug() << "Variance: " << variance(*reactionTimes);
-
-//        }
-//        reactionTimes->clear();
-
         if (mCount > mRecord)
             writeRecord(mCount);
     }
@@ -322,10 +286,10 @@ void SpeedTest::startAnimation()
 void SpeedTest::tick() {
     if (!mGameEnded) {        
         intervalTimer->setInterval(interval());
-        Flash flash;
-        flash.position = next;
-        flash.timestamp = elapsedTimer->elapsed();
-        flashes->append(flash);
+        flash newFlash;
+        newFlash.position = next;
+        newFlash.timestamp = elapsedTimer->elapsed();
+        flashes->append(newFlash);
 
         // end game if user has not responded to 10 flashes
 
@@ -336,13 +300,6 @@ void SpeedTest::tick() {
         }
 
         setColors(next);
-
-        // cheat test
-
-//        int randomInterval = randomGenerator->bounded(100, 300);
-//        QTimer::singleShot(randomInterval, this, [this]{buttonPressed(flashes->head().position);});
-
-
         next = (next + (randomGenerator->bounded(0, 2)) + 1) % 4;
     }
 }

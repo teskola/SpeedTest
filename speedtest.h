@@ -6,7 +6,12 @@
 #include <QElapsedTimer>
 #include <QQueue>
 #include <QRandomGenerator>
-#include "flash.cpp"
+#include "qtypes.h"
+
+struct flash {
+    int position;
+    qint64 timestamp;
+};
 
 class SpeedTest : public QObject
 {
@@ -67,7 +72,7 @@ private:
     bool mOrange_activated;
     bool mYellow_activated;
     bool mGameEnded;
-    QQueue<Flash> *flashes;
+    QQueue<flash> *flashes;
     int next;
     int mCount;
     int mRecord;

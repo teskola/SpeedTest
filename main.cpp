@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
+    const QUrl url(QStringLiteral("qrc:/qt/qml/sairaan_nopee/Main.qml"));
     QQmlContext* qmlContext = engine.rootContext();
     SpeedTest* speedTest = new SpeedTest{};
     qmlContext->setContextProperty("speedTest", speedTest);

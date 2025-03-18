@@ -111,10 +111,10 @@ ApplicationWindow {
                 Button {
                     text: qsTr("Quit")
                     Layout.fillWidth: true
-                    onClicked: Qt.callLater(Qt.quit());
+                    onClicked: Qt.quit();
                     Shortcut {
                         sequences: [StandardKey.Quit, "Esc"]
-                        onActivated: Qt.callLater(Qt.quit());
+                        onActivated: Qt.quit();
                     }
                 }
             }
