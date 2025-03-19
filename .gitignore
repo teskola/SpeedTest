@@ -1,4 +1,4 @@
-SpeedTest.pro.user
 android/*
 !android/AndroidManifest.xml
 build
+CMakeLists.txt.user
