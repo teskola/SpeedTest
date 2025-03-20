@@ -4,10 +4,10 @@ import QtQuick.Layouts
 import QtQuick.Controls.Material 2.3
 import SpeedTest 1.0
 
-ApplicationWindow {
+Window {
     id: window
     visible: true
-    visibility: Qt.platform.os !== "android" ? "FullScreen" : "Maximized"
+    visibility: Window.FullScreen
     title: qsTr("Speedtest")    
 
     SpeedTest {
